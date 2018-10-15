@@ -1,0 +1,68 @@
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from numpy import genfromtxt
+from numpy import loadtxt
+from time import time
+from datetime import datetime
+from sqlalchemy import Column, Integer, Float, Date
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from io import StringIO
+import pandas as pd
+
+from users import Users
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+def Load_Data(file_name):
+    data = genfromtxt(file_name, delimiter=',', skip_header=1)
+
+    return data.tolist()
+
+if __name__ == "__main__":
+    t = time()
+    #Create the database
+    engine = create_engine('sqlite:////tmp/csv_test.db')
+    db.Model.metadata.create_all(engine)
+
+    #Create the session
+    session = sessionmaker()
+    session.configure(bind=engine)
+    s = session()
+
+    file_name = "test.csv" 
+    print('38 '+file_name)   
+    data = Load_Data(file_name) 
+    print('44 '+data)
+
+    """try:
+        file_name = "test.csv" 
+        print('38 '+file_name)   
+        data = Load_Data(file_name) 
+        print('44 '+data)
+        for i in data:
+            print('i '+i)
+            print('data'+data)
+
+            record = Users(**{
+                'fname' : i[0],
+                'sname' : i[1],
+                'email' : i[2],
+                'school': i[3],
+                'city'  : i[4],
+                'state' : i[5]
+                })
+
+            s.add(record) #Add all the records
+            print(record)
+        s.commit() #Attempt to commit all the records
+    except:
+        s.rollback() #Rollback the changes on error
+    finally:        
+        s.close() #Close the connection
+"""
+print("Time elapsed: " + str(time() - t) + " s.")#0.091s
